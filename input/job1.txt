@@ -1,0 +1,5 @@
+$AMJ0001000010003
+GD10PD10H
+$DTA
+Hello World! This is MOS Phase 1!
+$END0001

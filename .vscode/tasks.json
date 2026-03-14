@@ -5,7 +5,7 @@
             "label": "Build memory test",
             "type": "shell",
             "command": "g++",
-            "args": ["src/test.cpp", "src/memory.cpp", "-o", "src/test"],
+            "args": ["src/test.cpp", "src/memory.cpp","src/loader.cpp", "-o", "src/test"],
             "group": { "kind": "build", "isDefault": true },
             "problemMatcher": ["$gcc"],
             "detail": "Compile test.cpp and memory.cpp together"
