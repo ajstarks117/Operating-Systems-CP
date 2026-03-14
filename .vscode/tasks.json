@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build memory test",
+            "type": "shell",
+            "command": "g++",
+            "args": ["src/test.cpp", "src/memory.cpp", "-o", "src/test"],
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": ["$gcc"],
+            "detail": "Compile test.cpp and memory.cpp together"
+        },
+        {
+            "label": "Run memory test",
+            "type": "shell",
+            "command": "src/test",
+            "problemMatcher": []
+        }
+    ]
+}

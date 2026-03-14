@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Run memory test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/src",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "preLaunchTask": "Build memory test"
+        }
+    ]
+}
