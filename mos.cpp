@@ -153,8 +153,6 @@ void LOAD() {
             cout << "[LOADER] New job detected." << endl;
         }
         else if (line.substr(0, 4) == "$DTA") {
-            cout << "\n-- Memory After Loading --" << endl;
-            M.displayMemory();
             cout << "[LOADER] $DTA — starting execution." << endl;
             STARTEXECUTION();
         }
