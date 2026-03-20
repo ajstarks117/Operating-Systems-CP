@@ -60,8 +60,16 @@ void WRITE() {
     for (int i = 0; i < 10; ++i) {
         char word[4];
         M.read(addr + i, word);
-        for (int j = 0; j < 4; ++j)
-            outputFile << word[j];
+        
+        // If it's a single character followed by 3 spaces, just print the character
+        // and skip the remaining spaces. This allows printing dense patterns like "***".
+        if (word[1] == ' ' && word[2] == ' ' && word[3] == ' ') {
+            outputFile << word[0];
+        } else {
+            for (int j = 0; j < 4; ++j) {
+                outputFile << word[j];
+            }
+        }
     }
     outputFile << endl;
 }
@@ -163,12 +171,21 @@ void LOAD() {
         }
         else {
             // Packed instructions: multiple 4-char instructions per line
+            // H is a special 1-char instruction (no operand), so it must
+            // be stored as its own word rather than being merged with the
+            // next instruction's characters.
             int len = (int)line.length();
-            for (int i = 0; i < len; i += 4) {
+            int i = 0;
+            while (i < len) {
                 char word[4] = {' ', ' ', ' ', ' '};
-                for (int j = 0; j < 4 && (i + j) < len; ++j)
-                    word[j] = line[i + j];
-
+                if (line[i] == 'H') {
+                    word[0] = 'H';
+                    i += 1;  // H has no operand, advance by 1
+                } else {
+                    for (int j = 0; j < 4 && (i + j) < len; ++j)
+                        word[j] = line[i + j];
+                    i += 4;
+                }
                 M.write(m, word);
                 m++;
             }

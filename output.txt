@@ -1,17 +1,21 @@
-HELLO WORLD FROM OS PROJECT TEST 0001   
+HELLO WORLD FROM OS PROJECT TEST 0001
 
 
-SECO                                    
+SECO         
 
 
-SAME                                    
+SAME         
 
 
-FINA                                    
+FINA         
 
 
-*                                       
-*   *                                   
-*   *   *                               
+*         
+**        
+***       
+
+
+ *        
+***       
 
 
