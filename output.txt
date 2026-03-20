@@ -4,7 +4,7 @@ HELLO WORLD FROM OS PROJECT TEST 0001
 SECO                                    
 
 
-NOT SAME                                
+SAME                                    
 
 
 FINA                                    

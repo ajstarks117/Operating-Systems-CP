@@ -171,8 +171,6 @@ void LOAD() {
 
                 M.write(m, word);
                 m++;
-
-                if (word[0] == 'H') break;
             }
         }
     }
