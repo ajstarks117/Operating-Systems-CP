@@ -2,19 +2,31 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build memory test",
+            "label": "Build MOS",
             "type": "shell",
             "command": "g++",
-            "args": ["src/test.cpp", "src/memory.cpp", "-o", "src/test"],
-            "group": { "kind": "build", "isDefault": true },
-            "problemMatcher": ["$gcc"],
-            "detail": "Compile test.cpp and memory.cpp together"
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Compile current C++ file"
         },
         {
-            "label": "Run memory test",
+            "label": "Run MOS",
             "type": "shell",
-            "command": "src/test",
-            "problemMatcher": []
+            "command": "${fileDirname}/${fileBasenameNoExtension}.exe",
+            "dependsOn": "Build MOS",
+            "problemMatcher": [],
+            "detail": "Run the compiled executable"
         }
     ]
 }

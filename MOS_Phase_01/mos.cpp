@@ -61,8 +61,7 @@ void WRITE() {
         char word[4];
         M.read(addr + i, word);
         
-        // If it's a single character followed by 3 spaces, just print the character
-        // and skip the remaining spaces. This allows printing dense patterns like "***".
+        
         if (word[1] == ' ' && word[2] == ' ' && word[3] == ' ') {
             outputFile << word[0];
         } else {
