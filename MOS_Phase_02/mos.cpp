@@ -112,6 +112,7 @@ void READ() {
     }
 
     int addr = getAddress();
+    if(PI != 0) return; 
     int ra = ADDRESSMAP(addr);
     
     if (ra == -1) return; // PI already set (should be handled in MOS)
@@ -128,13 +129,16 @@ void READ() {
 
 // SI=2 : Write 10 words from memory to output file
 void WRITE() {
-    pcb.LLC++;
-    if (pcb.LLC > pcb.TLL) {
+    // Check BEFORE incrementing
+    if (pcb.LLC + 1 > pcb.TLL) {
         TERMINATE(2); // Line Limit Exceeded
         return;
     }
+    
+    pcb.LLC++;
 
     int addr = getAddress();
+    if (PI != 0) return;
     int ra = ADDRESSMAP(addr);
     if (ra == -1) return; // PI already set (Operand Error or Page Fault)
 
@@ -142,13 +146,7 @@ void WRITE() {
         char word[4];
         M.read(ra + i, word);
         
-        if (word[0] == ' ' && word[1] == ' ' && word[2] == ' ' && word[3] == ' ') {
-            // Skip empty words or print as spaces? 
-            // Phase 1 printed char by char.
-            for (int j = 0; j < 4; ++j) outputFile << word[j];
-        } else {
-            for (int j = 0; j < 4; ++j) outputFile << word[j];
-        }
+        for (int j = 0; j < 4; ++j) outputFile << word[j];
     }
     outputFile << endl;
 }
@@ -176,6 +174,7 @@ void TERMINATE(int EM) {
 }
 
 // Interrupt handler (Decision Table)
+// Interrupt handler (Decision Table)
 void MOS() {
     if (TI == 0) {
         if (SI == 1) { READ(); SI = 0; }
@@ -200,13 +199,33 @@ void MOS() {
             }
         }
     } else if (TI == 2) {
-        if (SI == 1) TERMINATE(3);
-        else if (SI == 2) { WRITE(); TERMINATE(3); }
-        else if (SI == 3) TERMINATE(0);
-        else if (PI == 1) TERMINATE(3);
-        else if (PI == 2) TERMINATE(3);
-        else if (PI == 3) TERMINATE(3);
-        else TERMINATE(3);
+        if (SI == 1) {
+            TERMINATE(3);
+        }
+        else if (SI == 2) {
+            // FIX #5: Check LINE LIMIT priority before TIME LIMIT
+            if (pcb.LLC + 1 > pcb.TLL) {
+                TERMINATE(2);  // LINE LIMIT EXCEEDED takes priority
+            } else {
+                WRITE();
+                TERMINATE(3);  // TIME LIMIT EXCEEDED
+            }
+        }
+        else if (SI == 3) {
+            TERMINATE(0);
+        }
+        else if (PI == 1) {
+            TERMINATE(3);
+        }
+        else if (PI == 2) {
+            TERMINATE(3);
+        }
+        else if (PI == 3) {
+            TERMINATE(3);
+        }
+        else {
+            TERMINATE(3);
+        }
         TI = 0;
     }
 }
@@ -230,7 +249,11 @@ void EXECUTEUSERPROGRAM() {
 
         // Increment Time Counter
         pcb.TTC++;
-        if (pcb.TTC >= pcb.TTL) TI = 2;
+        if ((IR[0] == 'G' && IR[1] == 'D') || (IR[0] == 'S' && IR[1] == 'R')) {
+            pcb.TTC++;
+        }
+        // FIXED: Added closing brace above
+        if (pcb.TTC > pcb.TTL) TI = 2;
 
         // Check H first (no operand needed)
         if (IR[0] == 'H') {
