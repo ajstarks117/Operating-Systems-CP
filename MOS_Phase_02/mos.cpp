@@ -24,6 +24,7 @@ int  PI;
 int  TI;
 int  PTR; // Page Table Register
 bool terminateFlag; // To signal job termination
+vector<string> jobOutputBuffer; // Buffer to store PD output lines
 
 struct PCB {
     int jobID;
@@ -138,23 +139,27 @@ void WRITE() {
     int ra = ADDRESSMAP(addr);
     if (ra == -1) return; // PI already set (Operand Error or Page Fault)
 
+    string outputLine = "";
     for (int i = 0; i < 10; ++i) {
         char word[4];
         M.read(ra + i, word);
-        
-        if (word[0] == ' ' && word[1] == ' ' && word[2] == ' ' && word[3] == ' ') {
-            // Skip empty words or print as spaces? 
-            // Phase 1 printed char by char.
-            for (int j = 0; j < 4; ++j) outputFile << word[j];
-        } else {
-            for (int j = 0; j < 4; ++j) outputFile << word[j];
+        for (int j = 0; j < 4; ++j) {
+            outputLine += word[j];
         }
     }
-    outputFile << endl;
+    jobOutputBuffer.push_back(outputLine);
 }
 
 void TERMINATE(int EM) {
     terminateFlag = true;
+
+    // Flush buffer only if there is no error
+    if (EM == 0) {
+        for (const string& s : jobOutputBuffer) {
+            outputFile << s << endl;
+        }
+    }
+
     outputFile << "\nJOB ID: " << setfill('0') << setw(4) << pcb.jobID;
     switch (EM) {
         case 0: outputFile << " - NO ERROR"; break;
@@ -165,7 +170,7 @@ void TERMINATE(int EM) {
         case 5: outputFile << " - OPERAND ERROR"; break;
         case 6: outputFile << " - INVALID PAGE FAULT"; break;
     }
-    outputFile << "\nIC: " << setw(2) << IC << "  IR: ";
+    outputFile << "\nIC: " << setfill('0') << setw(2) << IC << "  IR: ";
     for(int i=0; i<4; i++) outputFile << IR[i];
     outputFile << "  TTC: " << pcb.TTC << "  LLC: " << pcb.LLC << endl;
     outputFile << endl << endl;
@@ -194,6 +199,7 @@ void MOS() {
                 M.write(PTR * 10 + pageNum, newPte);
                 PI = 0;
                 IC--; // Re-execute the instruction
+                pcb.TTC -= 2; // Roll back the time units for this failed attempt
             } else {
                 TERMINATE(6); // Invalid Page Fault
                 PI = 0;
@@ -230,6 +236,10 @@ void EXECUTEUSERPROGRAM() {
 
         // Increment Time Counter
         pcb.TTC++;
+        // GD and SR take 2 units of time
+        string opCode = ""; opCode += IR[0]; opCode += IR[1];
+        if (opCode == "GD" || opCode == "SR") pcb.TTC++;
+
         if (pcb.TTC >= pcb.TTL) TI = 2;
 
         // Check H first (no operand needed)
@@ -307,6 +317,7 @@ void LOAD() {
             IC = 0; C = false; SI = 0; PI = 0; TI = 0;
             memset(IR, ' ', 4);
             memset(R,  ' ', 4);
+            jobOutputBuffer.clear();
 
             // Initialize PCB
             pcb.jobID = stoi(line.substr(4, 4));
